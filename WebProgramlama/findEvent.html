@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Find Event - Event Application</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <style>
+    body {
+      background: linear-gradient(135deg, #2c3e50, #4ca1af);
+      min-height: 100vh;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      color: #fff;
+    }
+    .container {
+      margin-top: 4rem;
+    }
+    .search-bar {
+      background-color: #ffffff22;
+      backdrop-filter: blur(8px);
+      border-radius: 12px;
+      padding: 2rem;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    }
+    .search-bar input {
+      border-radius: 30px;
+      padding: 0.75rem 1.5rem;
+      border: none;
+      box-shadow: 0 0 5px rgba(255,255,255,0.2);
+    }
+    .search-bar button {
+      border-radius: 30px;
+      padding: 0.75rem 1.5rem;
+    }
+    .event-card {
+      background-color: #ffffff1a;
+      backdrop-filter: blur(8px);
+      border-radius: 15px;
+      padding: 1.5rem;
+      margin-top: 2rem;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+      color: #fff;
+    }
+    .event-card h5 {
+      font-weight: 600;
+    }
+    .event-card p {
+      color: #dce3e6cc;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1 class="text-center mb-4">Find Events</h1>
+    
+    <div class="search-bar text-center mx-auto mb-5" style="max-width: 600px;">
+      <form id="search-form" class="d-flex flex-column flex-md-row gap-3 justify-content-center">
+        <input type="text" id="search-input" class="form-control" placeholder="Search by event name, city..." />
+        <button type="submit" class="btn btn-primary">Search</button>
+      </form>
+    </div>
+
+    <!-- Sample Events -->
+    <div class="event-card" data-name="Community Tech Meetup" data-location="New York">
+      <h5>Community Tech Meetup</h5>
+      <p>Date: June 15, 2025</p>
+      <p>Location: New York, NY</p>
+      <p>Description: A gathering for tech enthusiasts to share projects and ideas.</p>
+      <button class="btn btn-outline-light btn-sm">Join</button>
+      <button class="btn btn-outline-light btn-sm">Chat</button>
+    </div>
+
+    <div class="event-card" data-name="Outdoor Music Festival" data-location="Los Angeles">
+      <h5>Outdoor Music Festival</h5>
+      <p>Date: July 3, 2025</p>
+      <p>Location: Los Angeles, CA</p>
+      <p>Description: Enjoy live performances from local and international artists.</p>
+      <button class="btn btn-outline-light btn-sm">Join</button>
+      <button class="btn btn-outline-light btn-sm">Chat</button>
+    </div>
+
+    <div class="event-card" data-name="Startup Pitch Day" data-location="San Francisco">
+      <h5>Startup Pitch Day</h5>
+      <p>Date: August 10, 2025</p>
+      <p>Location: San Francisco, CA</p>
+      <p>Description: Watch startups pitch to investors and network with entrepreneurs.</p>
+      <button class="btn btn-outline-light btn-sm">Join</button>
+      <button class="btn btn-outline-light btn-sm">Chat</button>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    // Arama formunu dinle
+    document.getElementById("search-form").addEventListener("submit", function (e) {
+      e.preventDefault();
+      const query = document.getElementById("search-input").value.toLowerCase();
+      const cards = document.querySelectorAll(".event-card");
+
+      cards.forEach(card => {
+        const name = card.dataset.name.toLowerCase();
+        const location = card.dataset.location.toLowerCase();
+        if (name.includes(query) || location.includes(query)) {
+          card.style.display = "block";
+        } else {
+          card.style.display = "none";
+        }
+      });
+    });
+
+    // Boş olunca tüm kartları geri göster
+    document.getElementById("search-input").addEventListener("input", function () {
+      if (this.value === "") {
+        document.querySelectorAll(".event-card").forEach(card => {
+          card.style.display = "block";
+        });
+      }
+    });
+  </script>
+</body>
+</html>
