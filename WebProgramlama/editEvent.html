@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Edit Event - Admin Panel</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <style>
+    body {
+      background: linear-gradient(135deg, #2c3e50, #4ca1af);
+      min-height: 100vh;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      color: #fff;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 2rem;
+    }
+    .edit-container {
+      background: #ffffff22;
+      backdrop-filter: blur(10px);
+      border-radius: 15px;
+      padding: 2.5rem 3rem;
+      width: 100%;
+      max-width: 480px;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.25);
+    }
+    h2 {
+      text-align: center;
+      margin-bottom: 1.5rem;
+      text-shadow: 0 1px 5px rgba(0,0,0,0.3);
+    }
+    label {
+      font-weight: 600;
+      margin-top: 1rem;
+      display: block;
+    }
+    input[type="text"],
+    input[type="date"],
+    input[type="time"],
+    input[type="number"],
+    textarea {
+      width: 100%;
+      padding: 0.75rem 1rem;
+      margin-top: 0.4rem;
+      border-radius: 10px;
+      border: none;
+      font-size: 1rem;
+      outline: none;
+      box-shadow: 0 0 8px rgba(255,255,255,0.15);
+      background-color: #ffffff33;
+      color: #fff;
+      resize: vertical;
+    }
+    textarea {
+      min-height: 100px;
+    }
+    input::placeholder,
+    textarea::placeholder {
+      color: #dce3e6cc;
+    }
+    .btn-save {
+      margin-top: 2rem;
+      width: 100%;
+      background-color: #4ca1af;
+      border: none;
+      padding: 12px;
+      border-radius: 50px;
+      font-weight: 700;
+      font-size: 1.1rem;
+      color: #fff;
+      transition: background-color 0.3s ease;
+      cursor: pointer;
+    }
+    .btn-save:hover {
+      background-color: #3b8b9c;
+    }
+    .btn-cancel {
+      margin-top: 0.75rem;
+      width: 100%;
+      background-color: transparent;
+      border: 2px solid #4ca1af;
+      padding: 10px;
+      border-radius: 50px;
+      font-weight: 600;
+      color: #4ca1af;
+      cursor: pointer;
+      transition: background-color 0.3s ease, color 0.3s ease;
+    }
+    .btn-cancel:hover {
+      background-color: #4ca1af;
+      color: #fff;
+    }
+  </style>
+</head>
+<body>
+  <div class="edit-container">
+    <h2>Edit Event</h2>
+    <form id="editEventForm">
+      <label for="eventName">Event Name</label>
+      <input type="text" id="eventName" name="eventName" placeholder="Event Name" required />
+
+      <label for="eventExplanation">Description</label>
+      <textarea id="eventExplanation" name="eventExplanation" placeholder="Description" required></textarea>
+
+      <label for="eventDate">Date</label>
+      <input type="date" id="eventDate" name="eventDate" required />
+
+      <label for="eventTime">Time</label>
+      <input type="time" id="eventTime" name="eventTime" required />
+
+      <label for="eventDuration">Duration (mins)</label>
+      <input type="number" id="eventDuration" name="eventDuration" min="1" placeholder="Duration in minutes" required />
+
+      <label for="eventCategory">Category</label>
+      <input type="text" id="eventCategory" name="eventCategory" placeholder="Category" required />
+
+      <button type="submit" class="btn-save">Save Changes</button>
+      <button type="button" class="btn-cancel" onclick="cancelEdit()">Cancel</button>
+    </form>
+  </div>
+
+  <script>
+    // Örnek verileri doldurmak için (örnek amaçlı)
+    document.addEventListener('DOMContentLoaded', () => {
+      const params = new URLSearchParams(window.location.search);
+      document.getElementById('eventName').value = params.get('name') || 'Sample Event';
+      document.getElementById('eventExplanation').value = params.get('description') || 'This is a sample event description.';
+      document.getElementById('eventDate').value = params.get('date') || new Date().toISOString().split('T')[0];
+      document.getElementById('eventTime').value = params.get('time') || '12:00';
+      document.getElementById('eventDuration').value = params.get('duration') || 60;
+      document.getElementById('eventCategory').value = params.get('category') || 'General';
+    });
+
+    document.getElementById('editEventForm').addEventListener('submit', (e) => {
+      e.preventDefault();
+
+      const eventData = {
+        name: document.getElementById('eventName').value.trim(),
+        description: document.getElementById('eventExplanation').value.trim(),
+        date: document.getElementById('eventDate').value,
+        time: document.getElementById('eventTime').value,
+        duration: parseInt(document.getElementById('eventDuration').value, 10),
+        category: document.getElementById('eventCategory').value.trim()
+      };
+
+      if (!eventData.name || !eventData.description || !eventData.date || !eventData.time || !eventData.duration || !eventData.category) {
+        alert('Please fill in all required fields.');
+        return;
+      }
+
+      // TODO: Backend API çağrısı ile güncelleme yapılabilir
+      alert(`Event updated successfully!\n
+Name: ${eventData.name}
+Description: ${eventData.description}
+Date: ${eventData.date}
+Time: ${eventData.time}
+Duration: ${eventData.duration} mins
+Category: ${eventData.category}`);
+
+      // İşlem sonrası admin sayfasına dön
+      window.location.href = 'admin.html';
+    });
+
+    function cancelEdit() {
+      window.location.href = 'admin.html';
+    }
+  </script>
+</body>
+</html>

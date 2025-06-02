@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Event Chat</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <style>
+    body {
+      background: linear-gradient(to right, #2c3e50, #4ca1af);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 2rem;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    .chat-card {
+      background-color: #ffffffcc;
+      border-radius: 16px;
+      width: 100%;
+      max-width: 700px;
+      padding: 1.5rem;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+    }
+
+    .chat-header {
+      font-size: 1.5rem;
+      font-weight: 600;
+      color: #2c3e50;
+      margin-bottom: 1rem;
+    }
+
+    .chat-box {
+      max-height: 400px;
+      overflow-y: auto;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      padding: 1rem;
+      background-color: #f8f9fa;
+      margin-bottom: 1rem;
+    }
+
+    .chat-message {
+      margin-bottom: 1rem;
+    }
+
+    .chat-message strong {
+      color: #2c3e50;
+    }
+
+    .chat-message span {
+      color: #555;
+      font-size: 0.9rem;
+    }
+
+    .chat-input {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .chat-input input {
+      flex: 1;
+      border-radius: 8px;
+    }
+
+    .btn-send {
+      background-color: #4ca1af;
+      border: none;
+      color: white;
+    }
+
+    .btn-send:hover {
+      background-color: #3b8b9c;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="chat-card">
+    <div class="chat-header text-center">Event Chat</div>
+
+    <!-- Chat messages -->
+    <div class="chat-box" id="chat-box">
+      <div class="chat-message">
+        <strong>John Doe</strong> <span>(12:30 PM)</span><br />
+        Looking forward to the event!
+      </div>
+      <div class="chat-message">
+        <strong>Jane Smith</strong> <span>(12:32 PM)</span><br />
+        Me too! Can’t wait to meet everyone.
+      </div>
+      <!-- Buraya backend'den mesajlar eklenecek -->
+    </div>
+
+    <!-- Message input -->
+    <form id="chat-form" class="chat-input">
+      <input type="text" class="form-control" placeholder="Type your message..." required />
+      <button type="submit" class="btn btn-send">Send</button>
+    </form>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

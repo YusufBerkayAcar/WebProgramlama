@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Admin Panel - Event Application</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <style>
+    body {
+      background: linear-gradient(135deg, #2c3e50, #4ca1af);
+      min-height: 100vh;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      color: #fff;
+      padding-bottom: 2rem;
+    }
+    .container {
+      margin-top: 3rem;
+    }
+    .admin-section {
+      background-color: #ffffff22;
+      backdrop-filter: blur(10px);
+      border-radius: 15px;
+      padding: 2rem;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+      margin-bottom: 2rem;
+      display: none;
+    }
+    .admin-section.active {
+      display: block;
+    }
+    .admin-section h3 {
+      margin-bottom: 1.5rem;
+    }
+    .list-group-item {
+      background-color: #ffffff1a;
+      border: none;
+      color: #fff;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    .action-buttons {
+      display: flex;
+      gap: 10px;
+    }
+    .action-buttons button {
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 0.9rem;
+      border: none;
+      color: #fff;
+    }
+    .btn-delete {
+      background-color: #dc3545;
+    }
+    .btn-delete:hover {
+      background-color: #c82333;
+    }
+    .btn-edit {
+      background-color: #5c5c5c;
+      color: #000;
+    }
+    .btn-edit:hover {
+      background-color: #5c5c5c;
+    }
+    .filter-buttons {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+    .filter-buttons button {
+      margin: 0 0.5rem;
+      padding: 0.5rem 1.2rem;
+      border-radius: 50px;
+      border: none;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      color: #fff;
+      background-color: #4ca1af;
+    }
+    .filter-buttons button:hover,
+    .filter-buttons button.active {
+      background-color: #3b8b9c;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1 class="text-center mb-4">Admin Panel</h1>
+
+    <!-- Filter Buttons -->
+    <div class="filter-buttons">
+      <button class="active" onclick="filter('all')">All</button>
+      <button onclick="filter('users')">Users</button>
+      <button onclick="filter('events')">Events</button>
+    </div>
+
+    <!-- Users Section -->
+    <div id="usersSection" class="admin-section active">
+      <h3>👤 Users</h3>
+      <ul class="list-group">
+        <li class="list-group-item">
+          John Doe (johndoe@example.com)
+          <div class="action-buttons">
+            <button class="btn-edit" onclick="editItem('user', this)">Edit</button>
+            <button class="btn-delete" onclick="removeUser(this)">Delete</button>
+          </div>
+        </li>
+        <li class="list-group-item">
+          Jane Smith (jane.smith@example.com)
+          <div class="action-buttons">
+            <button class="btn-edit" onclick="editItem('user', this)">Edit</button>
+            <button class="btn-delete" onclick="removeUser(this)">Delete</button>
+          </div>
+        </li>
+        <li class="list-group-item">
+          admin@test.com
+          <div class="action-buttons">
+            <button class="btn-edit" onclick="editItem('user', this)">Edit</button>
+            <button class="btn-delete" onclick="removeUser(this)">Delete</button>
+          </div>
+        </li>
+      </ul>
+    </div>
+
+    <!-- Events Section -->
+    <div id="eventsSection" class="admin-section active">
+      <h3>📅 Events</h3>
+      <ul class="list-group">
+        <li class="list-group-item">
+          Startup Pitch Day - San Francisco
+          <div class="action-buttons">
+            <button class="btn-edit" onclick="editItem('event', this)">Edit</button>
+            <button class="btn-delete" onclick="removeEvent(this)">Delete</button>
+          </div>
+        </li>
+        <li class="list-group-item">
+          Music Fest - Los Angeles
+          <div class="action-buttons">
+            <button class="btn-edit" onclick="editItem('event', this)">Edit</button>
+            <button class="btn-delete" onclick="removeEvent(this)">Delete</button>
+          </div>
+        </li>
+        <li class="list-group-item">
+          Tech Conference - New York
+          <div class="action-buttons">
+            <button class="btn-edit" onclick="editItem('event', this)">Edit</button>
+            <button class="btn-delete" onclick="removeEvent(this)">Delete</button>
+          </div>
+        </li>
+      </ul>
+    </div>
+  </div>
+
+  <script>
+   
+    function filter(type) {
+      const usersSection = document.getElementById('usersSection');
+      const eventsSection = document.getElementById('eventsSection');
+      const buttons = document.querySelectorAll('.filter-buttons button');
+
+      buttons.forEach(btn => btn.classList.remove('active'));
+
+      if (type === 'all') {
+        usersSection.classList.add('active');
+        eventsSection.classList.add('active');
+        buttons[0].classList.add('active');
+      } else if (type === 'users') {
+        usersSection.classList.add('active');
+        eventsSection.classList.remove('active');
+        buttons[1].classList.add('active');
+      } else if (type === 'events') {
+        usersSection.classList.remove('active');
+        eventsSection.classList.add('active');
+        buttons[2].classList.add('active');
+      }
+    }
+  </script>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
