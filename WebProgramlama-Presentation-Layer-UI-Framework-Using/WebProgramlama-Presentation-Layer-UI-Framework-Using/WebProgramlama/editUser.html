@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Edit User - Admin Panel</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <style>
+    body {
+      background: linear-gradient(135deg, #2c3e50, #4ca1af);
+      min-height: 100vh;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      color: #fff;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 2rem;
+    }
+    .edit-container {
+      background: #ffffff22;
+      backdrop-filter: blur(10px);
+      border-radius: 15px;
+      padding: 2.5rem 3rem;
+      width: 100%;
+      max-width: 480px;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.25);
+    }
+    h2 {
+      text-align: center;
+      margin-bottom: 1.5rem;
+      text-shadow: 0 1px 5px rgba(0,0,0,0.3);
+    }
+    label {
+      font-weight: 600;
+      margin-top: 1rem;
+      display: block;
+    }
+    input[type="text"],
+    input[type="email"],
+    input[type="date"],
+    input[disabled] {
+      width: 100%;
+      padding: 0.75rem 1rem;
+      margin-top: 0.4rem;
+      border-radius: 10px;
+      border: none;
+      font-size: 1rem;
+      outline: none;
+      box-shadow: 0 0 8px rgba(255,255,255,0.15);
+      background-color: #ffffff33;
+      color: #fff;
+    }
+    input::placeholder {
+      color: #dce3e6cc;
+    }
+    .btn-save {
+      margin-top: 2rem;
+      width: 100%;
+      background-color: #4ca1af;
+      border: none;
+      padding: 12px;
+      border-radius: 50px;
+      font-weight: 700;
+      font-size: 1.1rem;
+      color: #fff;
+      transition: background-color 0.3s ease;
+      cursor: pointer;
+    }
+    .btn-save:hover {
+      background-color: #3b8b9c;
+    }
+    .btn-cancel {
+      margin-top: 0.75rem;
+      width: 100%;
+      background-color: transparent;
+      border: 2px solid #4ca1af;
+      padding: 10px;
+      border-radius: 50px;
+      font-weight: 600;
+      color: #4ca1af;
+      cursor: pointer;
+      transition: background-color 0.3s ease, color 0.3s ease;
+    }
+    .btn-cancel:hover {
+      background-color: #4ca1af;
+      color: #fff;
+    }
+  </style>
+</head>
+<body>
+  <div class="edit-container">
+    <h2>Edit User</h2>
+    <form id="editUserForm">
+      <label for="user-id-input"><strong>User ID:</strong></label>
+      <input type="text" id="user-id-input" placeholder="User ID" disabled />
+
+      <label for="user-name-input"><strong>User Name:</strong></label>
+      <input type="text" id="user-name-input" placeholder="User Name" required />
+
+      <label for="user-email"><strong>User Email:</strong></label>
+      <input type="email" id="user-email" placeholder="User Email" required />
+
+      <label for="user-password"><strong>User Password:</strong></label>
+      <input type="text" id="user-password" placeholder="User Password" />
+
+      <label for="user-birth"><strong>User Birth:</strong></label>
+      <input type="date" id="user-birth" placeholder="User Birth" />
+
+      <label for="user-number"><strong>User Number:</strong></label>
+      <input type="text" id="user-number" placeholder="User Number" />
+
+      <input type="hidden" id="user-photo" />
+      <input type="hidden" id="user-location" />
+
+      <button type="submit" class="btn-save">Save Changes</button>
+      <button type="button" class="btn-cancel" onclick="cancelEdit()">Cancel</button>
+    </form>
+    <p id="error-message" style="color: red; margin-top: 1rem;"></p>
+  </div>
+
+  <script>
+    // Sayfa yüklendiğinde sessionStorage'dan verileri çek ve doldur
+    document.addEventListener('DOMContentLoaded', () => {
+      document.getElementById('user-name-input').value = sessionStorage.getItem('userName') || '';
+      document.getElementById('user-id-input').value = sessionStorage.getItem('userId') || '';
+      document.getElementById('user-email').value = sessionStorage.getItem('userEmail') || '';
+      document.getElementById('user-password').value = sessionStorage.getItem('userPassword') || '';
+      document.getElementById('user-photo').value = sessionStorage.getItem('userPhoto') || '';
+      document.getElementById('user-location').value = sessionStorage.getItem('userLocation') || '';
+      document.getElementById('user-birth').value = sessionStorage.getItem('userBirth') || '';
+      document.getElementById('user-number').value = sessionStorage.getItem('userNumber') || '';
+    });
+
+    // Form submit edildiğinde kullanıcı güncelle
+    document.getElementById('editUserForm').addEventListener('submit', function(event) {
+      event.preventDefault();
+
+      const userId = document.getElementById('user-id-input').value;
+      const userName = document.getElementById('user-name-input').value.trim();
+      const userEmail = document.getElementById('user-email').value.trim();
+      const userPassword = document.getElementById('user-password').value.trim();
+      const userPhoto = document.getElementById('user-photo').value;
+      const userLocation = document.getElementById('user-location').value;
+      const userBirth = document.getElementById('user-birth').value;
+      const userNumber = document.getElementById('user-number').value.trim();
+
+      if (!userName || !userEmail) {
+        alert('Please fill in all required fields (Name and Email).');
+        return;
+      }
+
+      const userDto = {
+        userName: userName,
+        userPassword: userPassword,
+        userEmail: userEmail,
+        userLocation: userLocation,
+        userPhoto: userPhoto,
+        userBirth: userBirth,
+        userNumber: userNumber
+      };
+
+      fetch(`http://localhost:8080/api/users/updateUser/${userId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(userDto),
+      })
+      .then(response => {
+        if (response.ok) {
+          alert("Kullanıcı başarıyla güncellendi!");
+          window.location.href = 'admin.html';
+        } else {
+          throw new Error('Kullanıcı güncellenemedi');
+        }
+      })
+      .catch(error => {
+        document.getElementById('error-message').innerText = error.message;
+      });
+    });
+
+    function cancelEdit() {
+      window.location.href = 'admin.html';
+    }
+  </script>
+</body>
+</html>
