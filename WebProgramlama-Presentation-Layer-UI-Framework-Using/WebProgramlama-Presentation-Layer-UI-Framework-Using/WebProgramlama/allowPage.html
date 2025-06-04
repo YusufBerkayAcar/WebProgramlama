@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Events</title>
+
+
+    <style>
+        body {
+            background-color: grey;
+        }
+
+        .event-container {
+            display: flex;
+            flex-wrap: wrap;
+        }
+
+        .event-info {
+            border: 1px solid #e92828;
+            background-color: #d3d3d3; 
+            padding: 10px;
+            margin: 10px;
+            width: 300px;
+        }
+
+        .event-info.accepted {
+            background-color: #4caf50; 
+        }
+
+        .event-info.declined {
+            background-color: #f44336;
+        }
+    </style>
+</head>
+<body>
+    <h2 id="user-id"></h2>
+    <div id="events-container" class="event-container"></div>
+
+    <script>
+        
+        const userId = sessionStorage.getItem("selectedId");
+
+        async function fetchEvents() {
+            try {
+                const response = await fetch(`http://localhost:8080/api/events/getAllEventsByOwnerId/${userId}`);
+                const events = await response.json();
+
+                const container = document.getElementById('events-container');
+                container.innerHTML = ''; 
+
+                if (events.length === 0) {
+                    container.innerHTML = '<p>No events found for this user.</p>';
+                    return;
+                }
+
+                events.forEach(event => {
+                    const eventDiv = document.createElement('div');
+                    eventDiv.classList.add('event-info');
+                    eventDiv.setAttribute('id', `event-${event.eventId}`);
+                    eventDiv.innerHTML = `
+                        <h3>${event.eventName}</h3>
+                        <p><strong>Event ID:</strong> ${event.eventId}</p>
+                        <p><strong>Description:</strong> ${event.eventExplanation}</p>
+                        <p><strong>Date:</strong> ${new Date(event.eventDate).toLocaleDateString()}</p>
+                        <p><strong>Time:</strong> ${event.eventTime}</p>
+                        <p><strong>Duration:</strong> ${event.eventDuration} mins</p>
+                        <p><strong>Category:</strong> ${event.eventCategory}</p>
+                        <p><strong>Location:</strong> (${event.eventLocationX}, ${event.eventLocationY})</p>
+                        <button onclick="acceptFunction(${event.eventId})" value="accept">Accept</button>
+                        <button onclick="declineFunction(${event.eventId})" value="decline">Decline</button>
+                    `;
+                    container.appendChild(eventDiv);
+                });
+            } catch (error) {
+                console.error('Error fetching events:', error);
+                const container = document.getElementById('events-container');
+                container.innerHTML = '<p>Error loading events</p>';
+            }
+        }
+
+        async function acceptFunction(eventId) {
+            const eventDiv = document.getElementById(`event-${eventId}`);
+            try {
+                const response = await fetch(`http://localhost:8080/api/events/isAllowed/${eventId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({isAllowed: 'accept'})
+                });
+
+                if (!response.ok) {
+                    document.getElementById('error-message').innerText = 'Event Kabul Edilemedi!';
+                    return;
+                }
+
+                alert("Event Kabul Edildi");
+                eventDiv.classList.remove('declined'); 
+                eventDiv.classList.add('accepted'); 
+            } catch (error) {
+                document.getElementById('error-message').innerText = error.message; 
+            }
+        }
+
+        async function declineFunction(eventId) {
+            const eventDiv = document.getElementById(`event-${eventId}`);
+            try {
+                const response = await fetch(`http://localhost:8080/api/events/isAllowed/${eventId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({isAllowed: 'decline'})
+                });
+
+                if (!response.ok) {
+                    document.getElementById('error-message').innerText = 'Event Reddedilemedi!';
+                    return;
+                }
+
+                alert("Event Reddedildi");
+                eventDiv.classList.remove('accepted'); 
+                eventDiv.classList.add('declined'); 
+            } catch (error) {
+                document.getElementById('error-message').innerText = error.message; 
+            }
+        }
+
+        window.onload = fetchEvents;
+    </script>
+</body>
+</html>

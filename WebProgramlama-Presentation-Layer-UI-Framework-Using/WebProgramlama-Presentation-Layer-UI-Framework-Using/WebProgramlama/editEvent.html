@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Edit Event - Admin Panel</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <style>
+    body {
+      background: linear-gradient(135deg, #2c3e50, #4ca1af);
+      min-height: 100vh;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      color: #fff;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 2rem;
+    }
+    .edit-container {
+      background: #ffffff22;
+      backdrop-filter: blur(10px);
+      border-radius: 15px;
+      padding: 2.5rem 3rem;
+      width: 100%;
+      max-width: 480px;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.25);
+    }
+    h2 {
+      text-align: center;
+      margin-bottom: 1.5rem;
+      text-shadow: 0 1px 5px rgba(0,0,0,0.3);
+    }
+    label {
+      font-weight: 600;
+      margin-top: 1rem;
+      display: block;
+    }
+    input[type="text"],
+    input[type="date"],
+    input[type="time"],
+    input[type="number"],
+    textarea {
+      width: 100%;
+      padding: 0.75rem 1rem;
+      margin-top: 0.4rem;
+      border-radius: 10px;
+      border: none;
+      font-size: 1rem;
+      outline: none;
+      box-shadow: 0 0 8px rgba(255,255,255,0.15);
+      background-color: #ffffff33;
+      color: #fff;
+      resize: vertical;
+    }
+    textarea {
+      min-height: 100px;
+    }
+    input::placeholder,
+    textarea::placeholder {
+      color: #dce3e6cc;
+    }
+    .btn-save {
+      margin-top: 2rem;
+      width: 100%;
+      background-color: #4ca1af;
+      border: none;
+      padding: 12px;
+      border-radius: 50px;
+      font-weight: 700;
+      font-size: 1.1rem;
+      color: #fff;
+      transition: background-color 0.3s ease;
+      cursor: pointer;
+    }
+    .btn-save:hover {
+      background-color: #3b8b9c;
+    }
+    .btn-cancel {
+      margin-top: 0.75rem;
+      width: 100%;
+      background-color: transparent;
+      border: 2px solid #4ca1af;
+      padding: 10px;
+      border-radius: 50px;
+      font-weight: 600;
+      color: #4ca1af;
+      cursor: pointer;
+      transition: background-color 0.3s ease, color 0.3s ease;
+    }
+    .btn-cancel:hover {
+      background-color: #4ca1af;
+      color: #fff;
+    }
+  </style>
+</head>
+<body>
+  <div class="edit-container">
+    <h2>Edit Event</h2>
+    <form id="editEventForm">
+      <label for="eventName">Event Name</label>
+      <input type="text" id="eventName" name="eventName" placeholder="Event Name" required />
+
+      <label for="eventExplanation">Description</label>
+      <textarea id="eventExplanation" name="eventExplanation" placeholder="Description" required></textarea>
+
+      <label for="eventDate">Date</label>
+      <input type="date" id="eventDate" name="eventDate" required />
+
+      <label for="eventTime">Time</label>
+      <input type="time" id="eventTime" name="eventTime" required />
+
+      <label for="eventDuration">Duration (mins)</label>
+      <input type="number" id="eventDuration" name="eventDuration" min="1" placeholder="Duration in minutes" required />
+
+      <label for="eventCategory">Category</label>
+      <input type="text" id="eventCategory" name="eventCategory" placeholder="Category" required />
+
+      <label for="eventLocationX">Location X</label>
+      <input type="text" id="eventLocationX" name="eventLocationX" placeholder="Latitude" required />
+
+      <label for="eventLocationY">Location Y</label>
+      <input type="text" id="eventLocationY" name="eventLocationY" placeholder="Longitude" required />
+
+      <button type="submit" class="btn-save">Save Changes</button>
+      <button type="button" class="btn-cancel" onclick="cancelEdit()">Cancel</button>
+    </form>
+  </div>
+
+  <script>
+    async function loadEventDetails() {
+      const eventId = sessionStorage.getItem('eventId');
+      if (!eventId) {
+        alert("No event ID found. Returning to event list.");
+        window.location.href = "eventList.html";
+        return;
+      }
+
+      try {
+        const response = await fetch(`http://localhost:8080/api/events/getEvent/${eventId}`, {
+          method: 'GET',
+          headers: { 'Content-Type': 'application/json' }
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to fetch event details.');
+        }
+
+        const event = await response.json();
+
+        document.getElementById('eventName').value = event.eventName;
+        document.getElementById('eventExplanation').value = event.eventExplanation;
+        document.getElementById('eventDate').value = event.eventDate.split('T')[0];
+        document.getElementById('eventTime').value = event.eventTime;
+        document.getElementById('eventDuration').value = event.eventDuration;
+        document.getElementById('eventCategory').value = event.eventCategory;
+        document.getElementById('eventLocationX').value = event.eventLocationX;
+        document.getElementById('eventLocationY').value = event.eventLocationY;
+      } catch (error) {
+        console.error("Error loading event details:", error);
+        alert("An error occurred while loading event details.");
+      }
+    }
+
+    async function updateEvent() {
+      const eventId = sessionStorage.getItem('eventId');
+      const event = {
+        eventName: document.getElementById('eventName').value,
+        eventExplanation: document.getElementById('eventExplanation').value,
+        eventDate: document.getElementById('eventDate').value,
+        eventTime: document.getElementById('eventTime').value,
+        eventDuration: document.getElementById('eventDuration').value,
+        eventCategory: document.getElementById('eventCategory').value,
+        eventLocationX: document.getElementById('eventLocationX').value,
+        eventLocationY: document.getElementById('eventLocationY').value
+      };
+
+      try {
+        const response = await fetch(`http://localhost:8080/api/events/updateEvent/${eventId}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(event)
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to update event.');
+        }
+
+        alert("Event updated successfully.");
+        window.location.href = "main.html";
+      } catch (error) {
+        console.error("Error updating event:", error);
+        alert("An error occurred while updating the event.");
+      }
+    }
+
+    document.getElementById('editEventForm').addEventListener('submit', function (e) {
+      e.preventDefault();
+      updateEvent();
+    });
+
+    function cancelEdit() {
+      window.location.href = 'admin.html';
+    }
+
+    window.onload = loadEventDetails;
+  </script>
+</body>
+</html>
