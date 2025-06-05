@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Login</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <style>
+    body {
+      background: linear-gradient(to right, #2c3e50, #4ca1af);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .login-card {
+      width: 100%;
+      max-width: 400px;
+      padding: 2rem;
+      background-color: #fff;
+      border-radius: 16px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+    }
+    .form-control:focus {
+      border-color: #4ca1af;
+      box-shadow: 0 0 0 0.2rem rgba(76, 161, 175, 0.25);
+    }
+    .btn-login {
+      background-color: #4ca1af;
+      border: none;
+    }
+    .btn-login:hover {
+      background-color: #3b8b9c;
+    }
+    .text-muted a {
+      color: #4ca1af;
+      text-decoration: none;
+    }
+    .text-muted a:hover {
+      text-decoration: underline;
+    }
+    #error-message {
+      color: red;
+      margin-top: 0.75rem;
+      font-weight: 600;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="login-card">
+    <h4 class="text-center mb-4">Sign In</h4>
+    <form id="login-form">
+      <div class="mb-3">
+        <label for="username" class="form-label">Username</label>
+        <input type="text" class="form-control" id="username" placeholder="Your username" required>
+      </div>
+      <div class="mb-3">
+        <label for="password" class="form-label">Password</label>
+        <input type="password" class="form-control" id="password" placeholder="Your password" required>
+      </div>
+      <div class="d-grid">
+        <button type="submit" class="btn btn-login text-white">Login</button>
+      </div>
+      <div id="error-message"></div>
+    </form>
+    <p class="mt-3 text-center text-muted">
+      Don't have an account? <a href="register.html">Sign Up</a>
+    </p>
+  </div>
+
+  <script>
+    async function login(event) {
+      event.preventDefault();
+
+      const username = document.getElementById('username').value.trim();
+      const password = document.getElementById('password').value;
+      const errorMessage = document.getElementById('error-message');
+      errorMessage.innerText = '';
+
+      try {
+        const response = await fetch('http://localhost:8080/api/users/login', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ userName: username, userPassword: password })
+        });
+
+        const text = await response.text();
+
+        if (!response.ok) {
+          try {
+            const errorData = JSON.parse(text);
+            errorMessage.innerText = errorData.message || 'Login failed.';
+          } catch {
+            errorMessage.innerText = 'Kullanıcı adı veya şifre hatalı!';
+          }
+          return;
+        }
+
+        const data = JSON.parse(text);
+
+        // Kullanıcı bilgilerini sessionStorage'a kaydet
+        sessionStorage.setItem('userId', data.userId);
+        sessionStorage.setItem('userName', data.userName);
+        sessionStorage.setItem('userEmail', data.userEmail);
+        sessionStorage.setItem('userGender', data.userGender);
+        sessionStorage.setItem('userNumber', data.userNumber);
+        sessionStorage.setItem('userLocation', data.userLocation);
+        sessionStorage.setItem('userBirth', data.userBirth);
+        sessionStorage.setItem('userInterests', data.userInterests);
+        sessionStorage.setItem('userPhoto', data.userPhoto);
+
+        // Kullanıcı adı "admin" ise admin sayfasına yönlendir
+        if (data.userName === 'admin') {
+          window.location.href = 'admin.html';
+        } else {
+          window.location.href = 'main.html';
+        }
+
+      } catch (error) {
+        errorMessage.innerText = 'Sunucu hatası: ' + error.message;
+      }
+    }
+
+    document.getElementById('login-form').addEventListener('submit', login);
+  </script>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
