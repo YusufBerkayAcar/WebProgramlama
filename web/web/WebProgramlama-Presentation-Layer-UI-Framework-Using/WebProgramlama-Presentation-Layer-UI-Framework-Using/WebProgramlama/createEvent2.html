@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Konum Seç</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <style>
+    body {
+      background: linear-gradient(to right, #2c3e50, #4ca1af);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Segoe UI', sans-serif;
+    }
+
+    .card {
+      border: none;
+      border-radius: 20px;
+      padding: 30px;
+      width: 100%;
+      max-width: 600px;
+      background: #ffffff;
+      box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
+    }
+
+    #map {
+      height: 400px;
+      width: 100%;
+      border-radius: 10px;
+      margin-bottom: 20px;
+    }
+
+    .btn-primary {
+      background-color: #4ca1af !important;
+      border: none !important;
+      border-radius: 50px !important;
+      padding: 10px 25px !important;
+      font-weight: 500 !important;
+      transition: 0.3s ease !important;
+    }
+
+    .btn-primary:hover {
+      background-color: #3b8b9c !important;
+    }
+
+    button:disabled {
+      background-color: #305861;
+      cursor: not-allowed;
+    }
+
+    .back-link {
+      font-size: 0.9rem;
+      text-decoration: none;
+      color: #305861;
+    }
+
+    .back-link:hover {
+      text-decoration: underline;
+    }
+
+    .title {
+      font-size: 1.8rem;
+      font-weight: bold;
+      color: #333;
+      margin-bottom: 10px;
+    }
+
+    .subtitle {
+      font-size: 0.95rem;
+      color: #666;
+      margin-bottom: 20px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="card">
+    <div class="text-center">
+      <div class="title">📍 Konum Seç</div>
+      <div class="subtitle">Etkinlik için bir konum belirlemek üzere haritaya tıklayın</div>
+    </div>
+
+    <div id="map"></div>
+
+    <div class="mb-3">
+      <label for="coordinates" class="form-label fw-semibold">Seçilen Konum</label>
+      <div id="coordinates" class="form-control bg-light text-muted">Henüz bir konum seçilmedi.</div>
+    </div>
+
+    <form id="location-form">
+      <div class="d-grid mt-3">
+        <button type="submit" class="btn btn-primary" id="save-location" disabled>Konumu Kaydet</button>
+      </div>
+    </form>
+
+    <div class="text-center mt-3">
+      <a href="createEvent.html" class="back-link">← Etkinlik bilgilerine geri dön</a>
+    </div>
+  </div>
+
+  <script>
+    let map;
+    let marker;
+    const submitButton = document.getElementById("save-location");
+    const coordinatesDisplay = document.getElementById("coordinates");
+
+    document.addEventListener("DOMContentLoaded", function () {
+      const eventData = JSON.parse(localStorage.getItem('eventData'));
+
+      // ❗ eventData yoksa yönlendir
+      if (!eventData) {
+        alert("Lütfen önce etkinlik bilgilerini doldurun.");
+        window.location.href = "createEvent.html";
+        return;
+      }
+
+      initMap();
+
+      document.getElementById("location-form").addEventListener("submit", function (event) {
+        event.preventDefault();
+        if (marker) {
+          const position = {
+            lat: marker.getPosition().lat(),
+            lng: marker.getPosition().lng()
+          };
+          submitForm(position);
+        }
+      });
+    });
+
+    function initMap() {
+      const initialPosition = { lat: 41.0082, lng: 28.9784 };
+      map = new google.maps.Map(document.getElementById("map"), {
+        center: initialPosition,
+        zoom: 10
+      });
+
+      map.addListener("click", (event) => {
+        addMarker(event.latLng);
+        submitButton.disabled = false;
+      });
+    }
+
+    function addMarker(position) {
+      if (marker) marker.setMap(null);
+      marker = new google.maps.Marker({
+        position,
+        map,
+        draggable: true,
+      });
+      map.panTo(position);
+
+      const lat = position.lat();
+      const lng = position.lng();
+      coordinatesDisplay.textContent = `Enlem: ${lat.toFixed(6)}, Boylam: ${lng.toFixed(6)}`;
+    }
+
+    function submitForm(position) {
+      const eventData = JSON.parse(localStorage.getItem('eventData'));
+
+      // ❗ Kategori boşsa POST etme
+      if (!eventData.eventCategory || eventData.eventCategory.length === 0) {
+        alert("Lütfen en az bir kategori seçin.");
+        return;
+      }
+
+      eventData.eventLocationX = position.lat;
+      eventData.eventLocationY = position.lng;
+
+      const formDataEvent = {
+        ...eventData,
+        eventCategory: eventData.eventCategory.join(', ')
+      };
+
+      fetch('http://localhost:8080/api/events/createEvent', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formDataEvent),
+      })
+      .then(response => response.json())
+      .then(async (data) => {
+        const userId = sessionStorage.getItem('userId');
+        if (userId) {
+          const pointsResponse = await fetch(`http://localhost:8080/api/points/user/${userId}/total`);
+          const totalPoints = await pointsResponse.json();
+          alert(`Etkinlik başarıyla oluşturuldu! Toplam puanınız: ${totalPoints}`);
+        }
+
+        setTimeout(() => {
+          window.location.href = "main.html";
+        }, 2000);
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        alert("Etkinlik oluşturulurken bir hata oluştu. Lütfen tekrar deneyin.");
+      });
+    }
+  </script>
+
+  <script async
+    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCbjNbUo9TVjIpTyeEJwCMAPiTVl5d5Vxs&callback=initMap">
+  </script>
+</body>
+</html>
