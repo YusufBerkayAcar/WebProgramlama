@@ -101,33 +101,20 @@ public class UserController {
     }
 
     @GetMapping("/getAllUsers")
-    public ResponseEntity<List<UserDto>> getAllUsers(HttpSession session) {
-        UserDto currentUser = (UserDto) session.getAttribute("user");
-        System.out.println("Sessiondaki kullanıcı: " + currentUser);
+    public ResponseEntity<List<UserDto>> getAllUsers(){
 
-        if (currentUser == null) {
-            System.out.println("Sessiondaki kullanıcı admin.");
-            List<UserDto> users = userService.getAllUsers();
-            return ResponseEntity.ok(users);
-        }
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-
+        List<UserDto> users = userService.getAllUsers();
+        return ResponseEntity.ok(users);
     }
-
 
     @DeleteMapping("/delete/{userId}")
-    public ResponseEntity<String> deleteUser(@PathVariable("userId") int userId, HttpSession session) {
-        UserDto currentUser = (UserDto) session.getAttribute("user");
-        System.out.println("Sessiondaki kullanıcı: " + currentUser);
+    public ResponseEntity<String> deleteUser(@PathVariable("userId") int userId){
 
-        if (currentUser == null) {
-            System.out.println("Sessiondaki kullanıcı admin.");
-            userService.deleteUser(userId);
-            return ResponseEntity.ok("User Deleted With Id : " + userId);
-        }
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        userService.deleteUser(userId);
+
+        return  ResponseEntity.ok("User Deleted With Id : " + userId);
+
     }
-
 
 
 }
