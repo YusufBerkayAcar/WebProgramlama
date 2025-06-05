@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <title>AI Chat</title>
+
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap');
+
+    body {
+      background: linear-gradient(135deg, #4ca1af 0%, #2c3e50 100%);
+      min-height: 100vh;
+      margin: 0;
+      font-family: 'Inter', sans-serif;
+      color: #e0f7fa;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 1rem;
+      box-sizing: border-box;
+    }
+
+    .chat-container {
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(12px);
+      border-radius: 20px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.35);
+      width: 100%;
+      max-width: 480px;
+      padding: 2rem 2.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+      text-align: center;
+    }
+
+    h1 {
+      font-weight: 700;
+      font-size: 2.6rem;
+      margin: 0 0 1rem 0;
+      text-shadow: 1px 1px 6px rgba(0, 0, 0, 0.5);
+    }
+
+    textarea#question {
+      width: 100%;
+      min-height: 120px;
+      resize: vertical;
+      border-radius: 12px;
+      border: none;
+      padding: 1rem 1.2rem;
+      font-size: 1.1rem;
+      font-weight: 400;
+      font-family: inherit;
+      background: rgba(255, 255, 255, 0.15);
+      color: #e0f7fa;
+      box-shadow: inset 0 0 8px rgba(76, 161, 175, 0.7);
+      transition: background-color 0.3s ease, box-shadow 0.3s ease;
+      outline: none;
+    }
+    textarea#question::placeholder {
+      color: #b0dce3cc;
+      font-style: italic;
+    }
+    textarea#question:focus {
+      background: rgba(255, 255, 255, 0.25);
+      box-shadow: inset 0 0 12px #4ca1af;
+      color: #fff;
+    }
+
+    button {
+      background: #4ca1af;
+      border: none;
+      padding: 12px 30px;
+      border-radius: 50px;
+      font-weight: 600;
+      color: #fff;
+      font-size: 1.1rem;
+      cursor: pointer;
+      box-shadow: 0 6px 15px rgba(76, 161, 175, 0.7);
+      transition: background-color 0.3s ease, transform 0.2s ease;
+      align-self: center;
+      user-select: none;
+    }
+    button:hover {
+      background: #3b8b9c;
+      transform: scale(1.05);
+    }
+    button:active {
+      transform: scale(0.98);
+    }
+
+    #answer {
+      margin-top: 1.5rem;
+      font-weight: 700;
+      font-size: 1.2rem;
+      min-height: 3rem;
+      color: #cce7eb;
+      text-shadow: 0 1px 4px rgba(0,0,0,0.4);
+      word-wrap: break-word;
+    }
+
+    @media (max-width: 520px) {
+      .chat-container {
+        padding: 1.5rem 1.5rem;
+        max-width: 100%;
+      }
+      textarea#question {
+        min-height: 100px;
+      }
+      button {
+        width: 100%;
+        padding: 14px 0;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="chat-container">
+    <h1>AI Chat</h1>
+    <textarea id="question" placeholder="Bir şey sor..."></textarea>
+    <button onclick="askAI()">Sor</button>
+    <div id="answer"></div>
+  </div>
+
+  <script>
+    function askAI() {
+      const question = document.getElementById("question").value.trim();
+      if (!question) {
+        alert("Lütfen bir soru girin!");
+        return;
+      }
+
+      document.getElementById("answer").innerText = "Yükleniyor...";
+
+      fetch("http://localhost:5000/ask", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ question })
+      })
+      .then(res => res.json())
+      .then(data => {
+        document.getElementById("answer").innerText = data.answer || "Cevap alınamadı.";
+      })
+      .catch(err => {
+        console.error("Hata:", err);
+        document.getElementById("answer").innerText = "Bir hata oluştu, lütfen tekrar deneyin.";
+      });
+    }
+  </script>
+</body>
+</html>
