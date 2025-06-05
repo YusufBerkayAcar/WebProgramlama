@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Find Event - Event Application</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <style>
+    body {
+      background: linear-gradient(135deg, #2c3e50, #4ca1af);
+      min-height: 100vh;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      color: #fff;
+    }
+    .container {
+      margin-top: 4rem;
+    }
+    .search-bar {
+      background-color: #ffffff22;
+      backdrop-filter: blur(8px);
+      border-radius: 12px;
+      padding: 2rem;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    }
+    .search-bar input {
+      border-radius: 30px;
+      padding: 0.75rem 1.5rem;
+      border: none;
+      box-shadow: 0 0 5px rgba(255,255,255,0.2);
+    }
+    .search-bar button {
+      border-radius: 30px;
+      padding: 0.75rem 1.5rem;
+    }
+    .event-card {
+      background-color: #ffffff1a;
+      backdrop-filter: blur(8px);
+      border-radius: 15px;
+      padding: 1.5rem;
+      margin-top: 2rem;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+      color: #fff;
+    }
+    .event-card h5 {
+      font-weight: 600;
+    }
+    .event-card p {
+      color: #dce3e6cc;
+    }
+    .event-card button {
+      margin-right: 0.5rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1 class="text-center mb-4">Find Events</h1>
+    
+    <div class="search-bar text-center mx-auto mb-5" style="max-width: 600px;">
+      <form id="search-form" class="d-flex flex-column flex-md-row gap-3 justify-content-center">
+        <input type="text" id="search-input" class="form-control" placeholder="Search by event name, city..." />
+        <button type="submit" class="btn btn-primary">Search</button>
+      </form>
+    </div>
+
+    <!-- Eventler buraya JS ile eklenecek -->
+    <div id="eventGrid"></div>
+  </div>
+
+  <script>
+    let events = [];
+    const userInterests = sessionStorage.getItem('userGender'); // Örnek: 'Male' veya 'Female'
+
+    async function fetchEvents() {
+      try {
+        const response = await fetch('http://localhost:8080/api/events/getAllEvents');
+        if (!response.ok) throw new Error("Failed to fetch events");
+
+        events = await response.json();
+        displayEvents(events);
+      } catch (error) {
+        console.error("Error fetching events:", error);
+        document.getElementById("eventGrid").innerHTML = `<p>Could not load events. Please try again later.</p>`;
+      }
+    }
+
+    function displayEvents(eventData) {
+      const priorityEvents = eventData.filter(event => event.eventCategory === userInterests);
+      const otherEvents = eventData.filter(event => event.eventCategory !== userInterests);
+      const sortedEvents = priorityEvents.concat(otherEvents);
+
+      const eventGrid = document.getElementById("eventGrid");
+      eventGrid.innerHTML = "";
+
+      if(sortedEvents.length === 0){
+        eventGrid.innerHTML = `<p>No events found.</p>`;
+        return;
+      }
+
+      sortedEvents.forEach(event => {
+        const eventBox = document.createElement("div");
+        eventBox.className = "event-card";
+        eventBox.innerHTML = `
+          <h5>${event.eventName}</h5>
+          <p><strong>Category:</strong> ${event.eventCategory}</p>
+          <p><strong>Date:</strong> ${new Date(event.eventDate).toLocaleDateString()}</p>
+          <p><strong>Time:</strong> ${event.eventTime}</p>
+          <p><strong>Duration:</strong> ${event.eventDuration} mins</p>
+          <p><strong>Description:</strong> ${event.eventExplanation}</p>
+          <button class="btn btn-outline-light btn-sm" onclick="joinEvent(${event.eventId})">Join</button>
+          <button class="btn btn-outline-light btn-sm" onclick="goToDetailsPage(${event.eventId})">Chat</button>
+        `;
+        eventGrid.appendChild(eventBox);
+      });
+    }
+
+    function goToDetailsPage(eventId) {
+      sessionStorage.setItem("eventId", eventId);
+      window.location.href = "eventDetails.html";
+    }
+
+    const joinEvent = async (eventId) => {
+    const userId = sessionStorage.getItem("userId");
+
+    if (!userId) {
+        alert("User ID is missing. Please log in and try again.");
+        return;
+    }
+
+    try {
+        const requestBody = {
+            userId: userId,
+            eventId: eventId,
+        };
+
+        const response = await fetch("http://localhost:8080/api/participants/joinEvent", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(requestBody),
+        });
+
+        if (response.ok) {
+            
+            const pointsResponse = await fetch("http://localhost:8080/api/points/addPoint", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    userId: userId,
+                    eventId: eventId,  
+                }),
+            });
+
+            if (pointsResponse.ok) {
+                alert("Successfully joined the event! Points have been added.");
+            } else {
+                const error = await pointsResponse.text();
+                alert(`Error adding points: ${error}`);
+            }
+
+        } else if (response.status === 409) {
+            const error = await response.text();
+            alert(error); // Çakışma mesajını göster
+        } else {
+            const error = await response.json();
+            alert(`Error joining event: ${error.message || "Unknown error"}`);
+        }
+    } catch (error) {
+        console.error("Error sending join request:", error);
+        alert("An unexpected error occurred. Please try again later.");
+    }
+};
+
+    function filterEvents(query) {
+      query = query.toLowerCase();
+      const filteredEvents = events.filter(event =>
+        event.eventName.toLowerCase().includes(query) || 
+        (event.eventLocation && event.eventLocation.toLowerCase().includes(query))
+      );
+      displayEvents(filteredEvents);
+    }
+
+    // Arama formu submit olayı
+    document.getElementById("search-form").addEventListener("submit", function (e) {
+      e.preventDefault();
+      const query = document.getElementById("search-input").value.trim();
+      filterEvents(query);
+    });
+
+    // Arama input boş olursa tüm etkinlikleri göster
+    document.getElementById("search-input").addEventListener("input", function () {
+      if (this.value === "") {
+        displayEvents(events);
+      }
+    });
+
+    window.onload = fetchEvents;
+  </script>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

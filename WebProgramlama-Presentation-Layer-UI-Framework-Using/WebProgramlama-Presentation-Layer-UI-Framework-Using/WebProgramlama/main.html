@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Home - Event Application</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <style>
+    body {
+      background: linear-gradient(135deg, #4ca1af 0%, #2c3e50 100%);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      color: #fff;
+      margin: 0;
+    }
+    header {
+      padding: 1rem 2rem 0.5rem 2rem;
+      text-align: center;
+      position: relative;
+    }
+    header h1 {
+      font-weight: 700;
+      font-size: 2.5rem;
+      margin-bottom: 0.3rem;
+      text-shadow: 1px 1px 3px rgba(0,0,0,0.3);
+    }
+    header p {
+      font-size: 1.1rem;
+      color: #cddde1cc;
+      margin-bottom: 0.7rem;
+    }
+    #user-name {
+      font-weight: 600;
+      font-size: 1.2rem;
+      color: #e0f7fa;
+      margin-bottom: 1rem;
+      text-shadow: 0 0 4px #4ca1af;
+    }
+    #map {
+      width: 100%;
+      max-width: 900px;
+      height: 300px;
+      margin: 0 auto 2rem auto;
+      border-radius: 15px;
+      box-shadow: 0 8px 20px rgb(0 0 0 / 0.3);
+    }
+    main {
+      flex-grow: 1;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 0 2rem 2rem 2rem;
+    }
+    .card-container {
+      display: flex;
+      gap: 2rem;
+      flex-wrap: wrap;
+      justify-content: center;
+      max-width: 900px;
+      width: 100%;
+    }
+    .card {
+      background: #ffffff22;
+      backdrop-filter: blur(10px);
+      border-radius: 15px;
+      width: 260px;
+      padding: 2rem 1.5rem;
+      box-shadow: 0 8px 20px rgb(0 0 0 / 0.15);
+      text-align: center;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      cursor: pointer;
+      color: #fff;
+    }
+    .card:hover {
+      transform: translateY(-10px);
+      box-shadow: 0 15px 30px rgb(0 0 0 / 0.3);
+    }
+    .card h3 {
+      margin-bottom: 1rem;
+      font-weight: 600;
+      font-size: 1.5rem;
+      text-shadow: 0 1px 5px rgba(0,0,0,0.3);
+    }
+    .card p {
+      font-size: 1rem;
+      margin-bottom: 1.5rem;
+      color: #dce3e6cc;
+      min-height: 60px;
+    }
+    .btn-action {
+      background: #4ca1af;
+      border: none;
+      padding: 10px 25px;
+      border-radius: 50px;
+      font-weight: 600;
+      color: #fff;
+      transition: background-color 0.3s ease;
+      text-decoration: none;
+      display: inline-block;
+    }
+    .btn-action:hover {
+      background: #3b8b9c;
+      color: #fff;
+      text-decoration: none;
+    }
+    footer {
+      text-align: center;
+      padding: 1rem;
+      font-size: 0.9rem;
+      color: #cddde1aa;
+    }
+    /* Travel mode selector style */
+    #travel-mode {
+      display: block;
+      margin: 0 auto 1rem auto;
+      padding: 0.5rem 1rem;
+      border-radius: 8px;
+      border: none;
+      font-size: 1rem;
+      max-width: 200px;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Welcome!</h1>
+    <p>Browse events, manage your own, or create a new one.</p>
+    <div id="user-name"></div>
+    <!-- Travel mode selector for directions -->
+    <select id="travel-mode" title="Select Travel Mode">
+      <option value="DRIVING">Driving</option>
+      <option value="WALKING">Walking</option>
+      <option value="BICYCLING">Bicycling</option>
+      <option value="TRANSIT">Transit</option>
+    </select>
+  </header>
+
+  <!-- Map container -->
+  <div id="map"></div>
+
+  <main>
+    <div class="card-container">
+      <div class="card" onclick="location.href='findEvents.html'">
+        <h3>🔍 Find Event</h3>
+        <p>Discover nearby events, join, and enjoy.</p>
+        <a href="findEvent.html" class="btn-action">Explore</a>
+      </div>
+      <div class="card" onclick="location.href='myEvents.html'">
+        <h3>📋 My Events</h3>
+        <p>View the list of events you have joined or created.</p>
+        <a href="myEvents.html" class="btn-action">List</a>
+      </div>
+      <div class="card" onclick="location.href='createEvent.html'">
+        <h3>➕ Create Event</h3>
+        <p>Create your own event and join the community.</p>
+        <a href="createEvent.html" class="btn-action">Create</a>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    © 2025 Event Application | All rights reserved.
+  </footer>
+
+  <!-- Your JavaScript -->
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+        initMap(); 
+        const userName = sessionStorage.getItem('userName');  
+        if(userName) {
+          document.getElementById('user-name').textContent = `Welcome, ${userName}!`;
+        }
+    });
+
+    function getDirections(userLat, userLng, eventLat, eventLng, travelMode) {
+        const directionsService = new google.maps.DirectionsService();
+        const directionsRenderer = new google.maps.DirectionsRenderer();
+        
+        const map = new google.maps.Map(document.getElementById("map"), {
+            zoom: 14,
+            center: { lat: userLat, lng: userLng },
+        });
+        directionsRenderer.setMap(map);
+
+        const request = {
+            origin: { lat: userLat, lng: userLng },
+            destination: { lat: eventLat, lng: eventLng },
+            travelMode: travelMode,
+        };
+
+        directionsService.route(request, (result, status) => {
+            if (status === "OK") {
+                directionsRenderer.setDirections(result);
+            } else {
+                alert("Rota oluşturulamadı: " + status);
+            }
+        });
+    }
+
+    function requestDirections(eventLat, eventLng) {
+        const travelMode = document.getElementById("travel-mode").value;
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    const userLat = position.coords.latitude;
+                    const userLng = position.coords.longitude;
+                    getDirections(userLat, userLng, eventLat, eventLng, travelMode);
+                },
+                (error) => {
+                    console.error("Konum alınamadı:", error);
+                    alert("Konum alınamadı. Lütfen cihaz ayarlarını kontrol edin.");
+                }
+            );
+        } else {
+            alert("Tarayıcınız konum hizmetlerini desteklemiyor.");
+        }
+    }
+
+    function initMap() {
+        const location = { lat: 41.0082, lng: 28.9784 };
+        const map = new google.maps.Map(document.getElementById("map"), {
+            zoom: 10,
+            center: location,
+        });
+
+        const userId = sessionStorage.getItem("userId");
+        if(!userId) {
+          console.warn("userId bulunamadı. Eventler yüklenemedi.");
+          return;
+        }
+
+        fetch(`http://localhost:8080/api/participants/user/${userId}/events`)
+            .then((response) => response.json())
+            .then((events) => {
+                events.forEach((event) => {
+                    const marker = new google.maps.Marker({
+                        position: { lat: event.eventLocationX, lng: event.eventLocationY },
+                        map: map,
+                        title: event.eventName,
+                    });
+
+                    const infoWindow = new google.maps.InfoWindow({
+                        content: `
+                            <div style="color: black; background-color: white;">
+                                <h2>${event.eventName}</h2>
+                                <p><strong>Açıklama:</strong> ${event.eventExplanation}</p>
+                                <p><strong>Tarih:</strong> ${new Date(event.eventDate).toLocaleDateString()}</p>
+                                <p><strong>Kategori:</strong> ${event.eventCategory}</p>
+                                <button onclick="leaveEvent(${userId}, ${event.eventId})" class="btn-action" style="margin:5px;">Left</button>
+                                <button onClick="goToChat(${userId}, ${event.eventId})" class="btn-action" style="margin:5px;">CHAT</button>
+                                <button onclick="requestDirections(${event.eventLocationX}, ${event.eventLocationY})" class="btn-action" style="margin:5px;">Directions</button>
+                            </div>
+                        `,
+                    });
+                    
+
+                    marker.addListener("click", () => {
+                        infoWindow.open(map, marker);
+                    });
+                });
+            })
+            .catch((error) => {
+                console.error("Etkinlikler alınırken bir hata oluştu:", error);
+            });
+    }
+
+    function leaveEvent(userId, eventId) {
+        fetch(`http://localhost:8080/api/participants/user/${userId}/event/${eventId}`, {
+            method: "DELETE",
+        })
+        .then((response) => {
+            if (response.ok) {
+                alert("Etkinlikten ayrıldınız.");
+                location.reload();
+            } else {
+                alert("Bir hata oluştu, lütfen tekrar deneyin.");
+            }
+        })
+        .catch((error) => {
+            console.error("Silme işlemi sırasında bir hata oluştu:", error);
+        });
+    }
+
+    function goToChat(userId, eventId) {
+        const chatUrl = `chat.html?userId=${userId}&eventId=${eventId}`;
+        window.open(chatUrl, "_blank");
+    }
+
+    window.onload = function() {
+      initMap();
+    };
+
+    function openPage() {
+        console.log("userId: ", sessionStorage.getItem("userId"));
+        window.close("main.html","_blank");
+        window.open("createEvent.html", "_blank");
+    }
+
+    function myEvents(){
+        window.close("main.html","_blank");
+        window.open("myEvents.html","_blank");
+    }
+
+    function findEvent(){
+        window.close("main.html","_blank");
+        window.open("findEvent.html","_blank");
+    }
+  </script>
+
+  <script async
+    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDq_TyhfgtGBbYTPBnRmJDT9vJ7Dz216iI&callback=initMap">
+  </script>
+</body>
+</html>
